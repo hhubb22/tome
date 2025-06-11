@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="基于EPUB转换的现代化电子书阅读器">
+    <meta name="author" content="Tome EPUB Reader">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ styles_path }}">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+</head>
+<body>
+    <!-- 阅读进度条 -->
+    <div class="reading-progress" id="reading-progress"></div>
+    
+    <main class="content">
+        <!-- 头部区域 -->
+        <header class="header">
+            <button class="theme-toggle" id="theme-toggle" aria-label="切换主题" title="切换明暗主题">
+                🌙
+            </button>
+            <h1>{{ title }}</h1>
+            <div class="subtitle">享受沉浸式阅读体验</div>
+        </header>
+        
+        <!-- 文章内容 -->
+        <article>
+            {{ body }}
+        </article>
+        
+        <!-- 页面导航 -->
+        <nav class="page-nav" role="navigation" aria-label="页面导航">
+            {{ nav }}
+        </nav>
+    </main>
+    
+    <!-- 返回顶部按钮 -->
+    <button class="back-to-top" id="back-to-top" aria-label="返回顶部" title="返回页面顶部">
+        ↑
+    </button>
+
+    <script>
+        // 主题切换功能
+        (function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            
+            // 获取保存的主题或根据系统偏好设置默认主题
+            const savedTheme = localStorage.getItem('theme');
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const initialTheme = savedTheme || (systemDark ? 'dark' : 'light');
+            
+            // 应用初始主题
+            html.setAttribute('data-theme', initialTheme);
+            updateThemeIcon(initialTheme);
+            
+            // 主题切换事件
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+                
+                // 添加切换动画效果
+                themeToggle.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    themeToggle.style.transform = 'scale(1)';
+                }, 150);
+            });
+            
+            function updateThemeIcon(theme) {
+                themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+                themeToggle.title = theme === 'dark' ? '切换到明亮主题' : '切换到暗色主题';
+            }
+            
+            // 监听系统主题变化
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                if (!localStorage.getItem('theme')) {
+                    const newTheme = e.matches ? 'dark' : 'light';
+                    html.setAttribute('data-theme', newTheme);
+                    updateThemeIcon(newTheme);
+                }
+            });
+        })();
+
+        // 阅读进度条功能
+        (function() {
+            const progressBar = document.getElementById('reading-progress');
+            const article = document.querySelector('article');
+            
+            if (!article) return;
+            
+            function updateProgress() {
+                const articleTop = article.offsetTop;
+                const articleHeight = article.offsetHeight;
+                const viewportHeight = window.innerHeight;
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                const totalScrollableHeight = articleHeight - viewportHeight + articleTop;
+                const scrolled = Math.max(0, scrollTop - articleTop);
+                const progress = Math.min(100, (scrolled / totalScrollableHeight) * 100);
+                
+                progressBar.style.transform = `scaleX(${progress / 100})`;
+            }
+            
+            // 节流函数
+            function throttle(func, limit) {
+                let inThrottle;
+                return function() {
+                    const args = arguments;
+                    const context = this;
+                    if (!inThrottle) {
+                        func.apply(context, args);
+                        inThrottle = true;
+                        setTimeout(() => inThrottle = false, limit);
+                    }
+                }
+            }
+            
+            window.addEventListener('scroll', throttle(updateProgress, 10));
+            window.addEventListener('resize', throttle(updateProgress, 100));
+            updateProgress(); // 初始化进度
+        })();
+
+        // 返回顶部按钮功能
+        (function() {
+            const backToTop = document.getElementById('back-to-top');
+            
+            function toggleBackToTopButton() {
+                if (window.pageYOffset > 300) {
+                    backToTop.classList.add('visible');
+                } else {
+                    backToTop.classList.remove('visible');
+                }
+            }
+            
+            backToTop.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            window.addEventListener('scroll', function() {
+                requestAnimationFrame(toggleBackToTopButton);
+            });
+        })();
+
+        // 图片懒加载和点击放大功能
+        (function() {
+            const images = document.querySelectorAll('img');
+            
+            images.forEach(img => {
+                // 图片加载错误处理
+                img.addEventListener('error', function() {
+                    this.style.display = 'none';
+                });
+                
+                // 图片点击放大（简单实现）
+                img.addEventListener('click', function() {
+                    if (this.style.transform === 'scale(1.5)') {
+                        this.style.transform = 'scale(1)';
+                        this.style.cursor = 'zoom-in';
+                        this.style.zIndex = 'auto';
+                    } else {
+                        this.style.transform = 'scale(1.5)';
+                        this.style.cursor = 'zoom-out';
+                        this.style.zIndex = '10';
+                    }
+                });
+                
+                img.style.cursor = 'zoom-in';
+            });
+        })();
+
+        // 键盘快捷键支持
+        (function() {
+            document.addEventListener('keydown', function(e) {
+                // Alt + T: 切换主题
+                if (e.altKey && e.key.toLowerCase() === 't') {
+                    e.preventDefault();
+                    document.getElementById('theme-toggle').click();
+                }
+                
+                // 空格键: 向下滚动
+                if (e.key === ' ' && !e.target.matches('input, textarea, [contenteditable]')) {
+                    e.preventDefault();
+                    window.scrollBy({
+                        top: window.innerHeight * 0.8,
+                        behavior: 'smooth'
+                    });
+                }
+                
+                // Shift + 空格键: 向上滚动
+                if (e.key === ' ' && e.shiftKey) {
+                    e.preventDefault();
+                    window.scrollBy({
+                        top: -window.innerHeight * 0.8,
+                        behavior: 'smooth'
+                    });
+                }
+                
+                // Home: 回到顶部
+                if (e.key === 'Home' && e.ctrlKey) {
+                    e.preventDefault();
+                    document.getElementById('back-to-top').click();
+                }
+            });
+        })();
+
+        // 性能优化：预加载下一页
+        (function() {
+            const nextLink = document.querySelector('.nav-next');
+            if (nextLink && 'IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            // 预加载下一页
+                            const link = document.createElement('link');
+                            link.rel = 'prefetch';
+                            link.href = nextLink.href;
+                            document.head.appendChild(link);
+                            observer.disconnect();
+                        }
+                    });
+                });
+                
+                observer.observe(document.querySelector('.page-nav'));
+            }
+        })();
+    </script>
+</body>
+</html>

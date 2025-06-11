@@ -30,6 +30,8 @@ pub struct Rootfile {
 #[derive(Debug, Deserialize)]
 pub struct Package {
     pub metadata: Metadata,
+    pub manifest: Manifest,
+    pub spine: Spine,
 }
 
 #[derive(Debug, Deserialize)]
@@ -61,4 +63,32 @@ pub struct Identifier {
     pub(crate) _id: Option<String>,
     #[serde(rename = "$text")]
     pub value: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Manifest {
+    #[serde(rename = "item", default)]
+    pub items: Vec<ManifestItem>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct ManifestItem {
+    #[serde(rename = "@id")]
+    pub id: String,
+    #[serde(rename = "@href")]
+    pub href: String,
+    #[serde(rename = "@media-type")]
+    pub media_type: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Spine {
+    #[serde(rename = "itemref", default)]
+    pub item_refs: Vec<ItemRef>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ItemRef {
+    #[serde(rename = "@idref")]
+    pub idref: String,
 }

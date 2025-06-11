@@ -28,7 +28,6 @@ pub enum AppError {
         source: quick_xml::DeError,
     },
     
-    // New variant for EPUB-specific format errors
     #[error("Invalid EPUB format: {0}")]
     InvalidEpubFormat(String),
 
@@ -36,6 +35,12 @@ pub enum AppError {
     Io {
         #[from] // Automatically convert from std::io::Error into AppError::Io
         source: std::io::Error,
+    },
+
+    #[error("HTML rewriting error: {source}")]
+    HtmlRewriting {
+        #[from] // Automatically convert from lol_html::errors::RewritingError into AppError::HtmlRewriting
+        source: lol_html::errors::RewritingError,
     },
 
     #[error("Source file '{path}' has no valid file name")]

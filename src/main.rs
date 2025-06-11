@@ -13,7 +13,8 @@ fn main() -> Result<()> {
 
     let result = match cli.command {
         Commands::Unpack(args) => command::unpack::run(args),
-        Commands::Meta(args) => command::meta::run(args), // 新增
+        Commands::Meta(args) => command::meta::run(args),
+        Commands::Webify(args) => command::webify::run(args),
     };
 
     if let Err(e) = result {
