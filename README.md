@@ -1,5 +1,3 @@
-> **Note:** This README contains placeholders such as `https://github.com/your-username/tome.git` and references to a missing `LICENSE` file. These should be updated with the actual information when the repository is finalized.
-
 # Tome
 
 A toolkit for working with EPUB files.
@@ -121,7 +119,7 @@ To build and install `tome` from source, you'll need to have Rust and Cargo inst
 2.  **Clone the Repository:**
     Clone this project repository to your local machine:
     ```bash
-    git clone https://github.com/your-username/tome.git # TODO: Replace with actual repository URL
+    git clone https://github.com/hhubb22/tome.git
     cd tome
     ```
 
@@ -162,7 +160,7 @@ We welcome contributions to `tome`! If you're interested in helping improve the 
 
 1.  **Fork and Clone:** Fork the repository to your own GitHub account and then clone it to your local machine.
     ```bash
-    git clone https://github.com/your-username/tome.git # TODO: Replace with your fork's URL
+    git clone https://github.com/hhubb22/tome.git
     cd tome
     ```
 
@@ -227,4 +225,3 @@ A big thank you to the entire Rust community for creating a productive and welco
 ## License
 
 This project is intended to be licensed under the MIT License.
-Please add a `LICENSE` file with the full text of the MIT License to the root of the repository to make this official.
